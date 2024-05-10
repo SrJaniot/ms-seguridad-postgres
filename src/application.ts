@@ -1,3 +1,7 @@
+//IMPORTANTE PARA QUE FUNCIONE EL .ENV EN EL PROYECTO ES DECIR QUE SE PUEDAN USAR LAS VARIABLES DE ENTORNO GRACIAS A LA LIBRERIA DOTENV
+//npm i dotenv
+require('dotenv').config();
+
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig} from '@loopback/core';
 import {
@@ -40,5 +44,9 @@ export class App extends BootMixin(
         nested: true,
       },
     };
+
+
+
+    
   }
 }

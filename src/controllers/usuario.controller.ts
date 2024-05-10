@@ -19,11 +19,16 @@ import {
 } from '@loopback/rest';
 import {Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
+import {service} from '@loopback/core';
+import {SeguridadService} from '../services';
 
 export class UsuarioController {
   constructor(
     @repository(UsuarioRepository)
     public usuarioRepository : UsuarioRepository,
+    //inyeccion de servicio de seguridad
+    @service(SeguridadService)
+    public seguridadService: SeguridadService,
   ) {}
 
   @post('/usuarios')
@@ -37,14 +42,42 @@ export class UsuarioController {
         'application/json': {
           schema: getModelSchemaRef(Usuario, {
             title: 'NewUsuario',
-            
+
           }),
         },
       },
     })
     usuario: Usuario,
-  ): Promise<Usuario> {
-    return this.usuarioRepository.create(usuario);
+  ): Promise<object> {
+    //Encriptar la clave
+    usuario.clave = this.seguridadService.encriptartexto(usuario.clave);
+    usuario.correo = usuario.correo.toLowerCase();
+    //verificar si el correo ya existe
+    let usuarioExiste = await this.usuarioRepository.findOne({where: {correo: usuario.correo}});
+    if(usuarioExiste){
+      return {
+        "CODIGO": 500,
+        "MENSAJE": "Operación exitosa",
+        "DATOS": "El correo ya existe en la base de datos"
+      };
+    }
+    //verificar si el id_usuario ya existe
+    usuarioExiste = await this.usuarioRepository.findOne({where: {id_usuario: usuario.id_usuario}});
+    if(usuarioExiste){
+      return {
+        "CODIGO": 500,
+        "MENSAJE": "Operación exitosa",
+        "DATOS": "El id_usuario (numero de documento) ya existe en la base de datos"
+      };
+    }
+    const result= await this.usuarioRepository.create(usuario);
+    //eliminar la clave encriptada
+    result.clave = "";
+    return {
+      "CODIGO": 200,
+      "MENSAJE": "Operación exitosa",
+      "DATOS": {result}
+    };
   }
 
   @get('/usuarios/count')

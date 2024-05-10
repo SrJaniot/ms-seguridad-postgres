@@ -1,5 +1,6 @@
 import {Entity, model, property} from '@loopback/repository';
 
+// CREACION DE LA ESPECIFICACION DE LA RELACION ENTRE MENU Y ROL ES DECIR LLAVE FORANEA PARA LA TABLA ROL
 @model(
   {
     settings: {

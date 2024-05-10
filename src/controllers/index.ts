@@ -9,3 +9,5 @@ export * from './usuario.controller';
 export * from './rol.controller';
 export * from './menu.controller';
 export * from './login.controller';
+export * from './seguridad.controller';
+export * from './excel.controller';

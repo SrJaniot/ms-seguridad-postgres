@@ -1,0 +1,407 @@
+// Uncomment these imports to begin using these cool features!
+
+import {getModelSchemaRef, HttpErrors, post,get, Request, requestBody, Response, response, RestBindings} from '@loopback/rest';
+import {Credenciales, FactorDeAutenticacionPorCodigo, HashValidacionUsuario, Login, Usuario, UsuarioInsert} from '../models';
+import {repository} from '@loopback/repository';
+import {inject, service} from '@loopback/core';
+import {LoginRepository, UsuarioRepository} from '../repositories';
+import {SeguridadService} from '../services';
+import {ConfiguracionSeguridad} from '../config/seguridad.config';
+
+
+
+
+
+
+
+
+
+
+
+
+
+export class SeguridadController {
+  constructor(
+    //repotorios------------------------------------------------------------------------
+    //llamado al repositorio de usuario para poder insertar en la base de datos mongo
+    @repository(UsuarioRepository)
+    public usuarioRepository: UsuarioRepository,
+    //llamado al repositorio de login para poder insertar en la base de datos mongo
+    @repository(LoginRepository)
+    public loginRepository: LoginRepository,
+
+    //servicios-------------------------------------------------------------------------
+    //inyeccion para poder utilizar el servicio de seguridad
+    @service(SeguridadService)
+    public seguridadService: SeguridadService,
+
+
+    @inject(RestBindings.Http.REQUEST) private request: Request
+
+
+
+
+  ) {}
+
+  //----------------------------------------------------------------METODOS PARA EL REGISTRO----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+  // este sera el registro publico de los USUARIOS
+  //este enpoint debe ser unicamente usado por el administrador                     --OJO--
+  //METODO POST PARA INSERTAR DATOS USUARIO EN LA BASE DE DATOS POSTGRES
+  @post('/funcion-inserta-usuario-rolEstudiante-SINHASHDEVALIDACION')
+  @response(200, {
+    description: ' db postgres ',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(UsuarioInsert),
+
+      },
+    },
+  })
+  async crearUsuario_SINHASH(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(UsuarioInsert),
+        },
+      },
+    })
+    data: UsuarioInsert,
+  ): Promise<object> {
+    try {
+      //CREAR UN OBJETO DE TIPO USUARIO PARA INSERTARLO EN LA BASE DE DATOS
+      let usuario: Usuario = new Usuario();
+      usuario.id_usuario = data.id_usuario;
+      usuario.nombre = data.nombre;
+      usuario.correo = data.correo.toLowerCase();
+      usuario.celular = data.celular;
+      //ROL APRENDIZ
+      usuario.rolid = ConfiguracionSeguridad.rolEstudianteID;
+      //CIFRAR LA CONTRASEÑA
+      let clavecifrada = this.seguridadService.encriptartexto(data.clave);
+      //ASIGNAR LA CLAVE CIFRADA AL USUARIO
+      usuario.clave = clavecifrada;
+      //console.log(params);
+      usuario.estadovalidacion = true;
+      usuario.aceptado = true;
+      //IF QUE PERMITE SABER SI EL CORREO YA EXISTE EN LA BASE DE DATOS POSTGRES
+      let existeCorreo = await this.usuarioRepository.findOne({
+        where: {
+          correo: usuario.correo
+        }
+      });
+      if (existeCorreo) {
+        return {
+          "CODIGO": 3,
+          "MENSAJE": "El correo ya existe en la base de datos",
+          "DATOS": "El correo ya existe en la base de datos"
+        };
+      }
+      //IF QUE ME PERMITE SABER SI EL ID_USUARIO YA EXISTE EN LA BASE DE DATOS POSTGRES
+      let existeIdUsuario = await this.usuarioRepository.findOne({
+        where: {
+          id_usuario: usuario.id_usuario
+        }
+      });
+      if (existeIdUsuario) {
+        return {
+          "CODIGO": 3,
+          "MENSAJE": "El id_usuario (NUM DOC) ya existe en la base de datos",
+          "DATOS": "El id_usuario (NUM DOC) ya existe en la base de datos"
+        };
+      }
+
+      const result = await this.usuarioRepository.create(usuario);
+      //eliminar la clave encriptada
+      result.clave = "";
+
+      //ENVIAR CORREO ELECTRONICO DE CONFIRMACION
+
+      return {
+        "CODIGO": 200,
+        "MENSAJE": "Operación exitosa",
+        "DATOS": result
+      };
+    } catch (err) {
+      throw {
+        "CODIGO": 500,
+        "MENSAJE": `Error al realizar las operaciones: ${err}`,
+        "DATOS": `Error al realizar las operaciones: ${err}`
+      };
+    }
+  }
+
+
+
+
+
+  // este sera el registro publico de los USUARIOS
+  //METODO POST PARA INSERTAR DATOS USUARIO EN LA BASE DE DATOS POSTGRES CON HASH DE VALIDACION
+  //publico
+  @post('/funcion-inserta-usuario-rolEstudiante-CONHASHDEVALIDACION')
+  @response(200, {
+    description: ' db postgres ',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(UsuarioInsert),
+
+      },
+    },
+  })
+  async crearUsuario_PUBLICO(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(UsuarioInsert),
+        },
+      },
+    })
+    data: UsuarioInsert,
+  ): Promise<object> {
+    try {
+      //CREAR UN OBJETO DE TIPO USUARIO PARA INSERTARLO EN LA BASE DE DATOS
+      let usuario: Usuario = new Usuario();
+      usuario.id_usuario = data.id_usuario;
+      usuario.nombre = data.nombre;
+      usuario.correo = data.correo.toLowerCase();
+      usuario.celular = data.celular;
+      //ROL APRENDIZ
+      usuario.rolid = ConfiguracionSeguridad.rolEstudianteID;
+      //CIFRAR LA CONTRASEÑA
+      let clavecifrada = this.seguridadService.encriptartexto(data.clave);
+      //ASIGNAR LA CLAVE CIFRADA AL USUARIO
+      usuario.clave = clavecifrada;
+      //console.log(params);
+
+      //hash de validacion para el correo
+      let hash = this.seguridadService.crearTextoAleatoria(100);
+      usuario.hashvalidacion = hash;
+      usuario.estadovalidacion = false;
+      usuario.aceptado = false;
+      //IF QUE PERMITE SABER SI EL CORREO YA EXISTE EN LA BASE DE DATOS MONGO
+      let existeCorreo = await this.usuarioRepository.findOne({
+        where: {
+          correo: usuario.correo
+        }
+      });
+      if (existeCorreo) {
+        return {
+          "CODIGO": 3,
+          "MENSAJE": "El correo ya existe en la base de datos",
+          "DATOS": "El correo ya existe en la base de datos"
+        };
+      }
+      //IF QUE ME PERMITE SABER SI EL ID_USUARIO YA EXISTE EN LA BASE DE DATOS MONGO
+      let existeIdUsuario = await this.usuarioRepository.findOne({
+        where: {
+          id_usuario: usuario.id_usuario
+        }
+      });
+      if (existeIdUsuario) {
+        return {
+          "CODIGO": 3,
+          "MENSAJE": "El id_usuario (NUM DOC) ya existe en la base de datos",
+          "DATOS": "El id_usuario (NUM DOC) ya existe en la base de datos"
+        };
+      }
+      const result = await this.usuarioRepository.create(usuario);
+      //eliminar la clave encriptada
+      result.clave = "";
+      //ENVIAR CORREO ELECTRONICO DE CONFIRMACION CON EL HASH DE VALIDACION
+
+      return {
+        "CODIGO": 200,
+        "MENSAJE": "Operación exitosa",
+        "DATOS": result
+      };
+    } catch (err) {
+      throw {
+        "CODIGO": 500,
+        "MENSAJE": `Error al realizar las operaciones: ${err}`,
+        "DATOS": `Error al realizar las operaciones: ${err}`
+      };
+    }
+  }
+
+
+
+
+
+
+
+
+
+   //-------------------------------------METODOS PARA EL LOGIN----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  /**
+   * Metodo para identificar un usuario por medio de su correo y su clave generando un codigo 2fa
+   * @param credenciales
+   * @returns usuario
+   */
+  @post('/identificar-usuario-2fa')
+  @response(200, {
+    description: 'Identificar usuario por clave y correo',
+    content: {'application/json': {schema: getModelSchemaRef(Usuario)}},
+  })
+  async identificarUsuario(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Credenciales),
+        },
+      },
+    })
+    credenciales: Credenciales,
+  ): Promise<object> {
+    let usuario = await this.seguridadService.identificarusuario(credenciales);
+    if (usuario) {
+      //generar codigo 2fa
+      let codigo2fa = this.seguridadService.crearTextoAleatoria(5);
+      let login: Login = new Login();
+      login.usuarioid = usuario.id_usuario!;
+      login.codigo_2fa = codigo2fa;
+      login.estado_codigo2fa = false;
+      login.token = '';
+      login.estado_token = false;
+
+      //reformatear la clave para no mostrarla
+      usuario.clave = "";
+
+      await this.loginRepository.create(login);
+      //notificar al usuario via correo o sms del codigo 2fa
+
+      return {
+        "CODIGO": 200,
+        "MENSAJE": "Operación exitosa",
+        "DATOS": usuario
+      };
+    }
+    return {
+      "CODIGO": 2,
+      "MENSAJE": "Operación fallida",
+      "DATOS": "Usuario no encontrado"
+    }
+  }
+
+
+
+  /**
+   *  Metodo para validar el hash de un correo
+   * @param hash
+   * @returns
+   */
+  @post('/validar-hash-correo-publico')
+  @response(200, {
+    description: 'Valida el hash de un correo',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(HashValidacionUsuario),
+      },
+    },
+  })
+  async validarhashCorreo(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(HashValidacionUsuario),
+        },
+      },
+    })
+    hash: HashValidacionUsuario,
+  ): Promise<object> {
+    try {
+      let usuario = await this.usuarioRepository.findOne({
+        where: {
+          hashvalidacion: hash.codigoHash,
+          estadovalidacion: false,
+        }
+      });
+      if (usuario) {
+        let key = await this.usuarioRepository.updateById(usuario.id_usuario, {
+          estadovalidacion: true,
+        });
+        //ENVIAR MENSAJE DE WHATSAPP DE CONFIRMACION
+
+        return {
+          "CODIGO": 200,
+          "MENSAJE": "Operación exitosa",
+          "DATOS": true
+        };
+
+      } else {
+        return {
+          "CODIGO": 2,
+          "MENSAJE": "Operación fallida",
+          "DATOS": false
+        };
+      }
+    } catch (err) {
+      throw {
+        "CODIGO": 500,
+        "MENSAJE": `Error al realizar las operaciones: ${err}`,
+        "DATOS": `Error al realizar las operaciones: ${err}`
+      };
+    }
+  }
+
+  /**
+   * Metodo para validar el codigo 2fa
+   * @param login
+   * @returns
+   */
+  @post('/verificar-2fa')
+  @response(200, {
+    description: 'validar un codigo de 2fa',
+  })
+  async VerificarCodigo2fa(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(FactorDeAutenticacionPorCodigo),
+        },
+      },
+    })
+    credenciales: FactorDeAutenticacionPorCodigo,
+  ): Promise<object> {
+    let usuario = await this.seguridadService.validarCoddigo2fa(credenciales);
+    if (usuario) {
+      let token = this.seguridadService.CrearToken(usuario);
+      //borrando la clave para no mostrarla
+      usuario.clave = "";
+      //actualizar el estado del codigo 2fa  a true
+      try {
+        this.usuarioRepository.logins(usuario.id_usuario).patch({
+          estado_codigo2fa: true,
+          token: token,
+          estado_token: true,
+        },
+          {
+            estado_codigo2fa: false,
+            codigo_2fa: credenciales.codigo2fa,
+          });
+
+      } catch (err) {
+        throw new HttpErrors[500](`Error al actualizar el estado del codigo 2fa: ${err}`);
+      }
+
+
+      return {
+        "CODIGO": 200,
+        "MENSAJE": "Operación exitosa",
+        "DATOS": {usuario, token}
+      };
+    }
+    return {
+      "CODIGO": 2,
+      "MENSAJE": "Operación fallida",
+      "DATOS": "Usuario no encontrado"
+    }
+  }
+
+
+
+
+
+
+}
