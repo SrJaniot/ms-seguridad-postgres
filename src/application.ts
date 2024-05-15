@@ -13,6 +13,8 @@ import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {MySequence} from './sequence';
+import {AuthenticationComponent, registerAuthenticationStrategy} from '@loopback/authentication';
+import {AuthStrategy} from './auth/strategy';
 
 export {ApplicationConfig};
 
@@ -44,9 +46,16 @@ export class App extends BootMixin(
         nested: true,
       },
     };
+    // aca estoy registrando la estrategia de autenticacion que esta en la carpeta auth
+    registerAuthenticationStrategy(this, AuthStrategy);
+    //registerAuthenticationStrategy(this, AuthStrategyIdPostgres);
+
+    // Registra el componente de autenticación una sola vez
+    this.component(AuthenticationComponent);
 
 
 
-    
+
+
   }
 }

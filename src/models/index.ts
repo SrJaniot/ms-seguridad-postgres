@@ -7,8 +7,9 @@ export * from './credenciales.model';
 export * from './factor-de-autenticacion-por-codigo.model';
 export * from './credenciales.model';
 export * from './hash-validacion-usuario.model';
-
-
-
-
 export * from './usuario-insert.model';
+export * from './cerrar-sesion.model';
+export * from './permisos-rol-menu.model';
+export * from './permisos-rol-menu2.model';
+
+

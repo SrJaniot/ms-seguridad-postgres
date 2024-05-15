@@ -11,3 +11,6 @@ export * from './menu.controller';
 export * from './login.controller';
 export * from './seguridad.controller';
 export * from './excel.controller';
+export * from './auth.controller';
+
+export * from './permisos.controller';

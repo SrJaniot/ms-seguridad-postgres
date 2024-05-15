@@ -1,7 +1,7 @@
 // Uncomment these imports to begin using these cool features!
 
 import {getModelSchemaRef, HttpErrors, post,get, Request, requestBody, Response, response, RestBindings} from '@loopback/rest';
-import {Credenciales, FactorDeAutenticacionPorCodigo, HashValidacionUsuario, Login, Usuario, UsuarioInsert} from '../models';
+import {CerrarSesion, Credenciales, FactorDeAutenticacionPorCodigo, HashValidacionUsuario, Login, Usuario, UsuarioInsert} from '../models';
 import {repository} from '@loopback/repository';
 import {inject, service} from '@loopback/core';
 import {LoginRepository, UsuarioRepository} from '../repositories';
@@ -398,6 +398,82 @@ export class SeguridadController {
       "DATOS": "Usuario no encontrado"
     }
   }
+
+
+
+
+
+  //METODO QUE ME INAVILITA EL TOKEN ES DECIR PONE ESTADO_TOKEN EN FALSE
+  @post('/cerrar-sesion')
+  @response(200, {
+    description: 'logout',
+  })
+  async logout(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(CerrarSesion),
+        },
+      },
+    })
+    CerrarSesion: CerrarSesion,
+  ): Promise<object> {
+    try {
+
+      let key = await this.usuarioRepository.logins(CerrarSesion.id_usuario).patch({
+        estado_token: false,
+      },
+        {
+          estado_token: true,
+          token: CerrarSesion.token,
+        });
+
+      if (key.count === 0) {
+        return {
+          "CODIGO": 2,
+          "MENSAJE": "Operación fallida",
+          "DATOS": "Token o usuario no encontrado"
+        };
+      }
+      return {
+        "CODIGO": 200,
+        "MENSAJE": "Operación exitosa",
+        "DATOS": "Token invalidado"
+      };
+
+
+    } catch (err) {
+      throw new HttpErrors[500](`Error al actualizar el estado del token: ${err}`);
+    }
+  }
+
+
+  //METODOS EXTRAS ----------------------------------------------------------------------------------------------------------------------------
+    //METODO PARA GENERAR UN HASH DE 100 CARACTERES
+    @post('/generar-hash-100')
+    @response(200, {
+      description: 'Generar un hash',
+    })
+    async generarHash(): Promise<object> {
+      let hash = this.seguridadService.crearTextoAleatoria(100);
+      return {hash};
+    }
+
+    //METODO PARA GENERAR UN HASH DE 10 CARACTERES
+    @post('/generar-hash-10')
+    @response(200, {
+      description: 'Generar un hash',
+    })
+    async generarHash10(): Promise<object> {
+      let hash = this.seguridadService.crearTextoAleatoria(10);
+      return {hash};
+    }
+
+
+
+
+
+
 
 
 
