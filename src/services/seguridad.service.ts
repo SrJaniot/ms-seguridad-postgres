@@ -1,7 +1,7 @@
 import {injectable, /* inject, */ BindingScope} from '@loopback/core';
-import {Credenciales, FactorDeAutenticacionPorCodigo, Usuario} from '../models';
+import {Credenciales, FactorDeAutenticacionPorCodigo, MenuRol, Usuario} from '../models';
 import {repository} from '@loopback/repository';
-import {LoginRepository, UsuarioRepository} from '../repositories';
+import {LoginRepository, MenuRolRepository, UsuarioRepository} from '../repositories';
 import {ConfiguracionSeguridad} from '../config/seguridad.config';
 import {HttpErrors} from '@loopback/rest';
 
@@ -23,6 +23,10 @@ export class SeguridadService {
     //inyeccion para poder utilizar el repositorio de login para poder hacer consultas a la base de datos
     @repository(LoginRepository)
     public loginRepository: LoginRepository,
+
+    //inyeccion para poder utilizar el repositorio de MenuRol para poder hacer consultas a la base de datos
+    @repository(MenuRolRepository)
+    public menurolRepository: MenuRolRepository,
 
 
     ){}
@@ -184,6 +188,21 @@ async validarCoddigo2fa(credenciales2fa: FactorDeAutenticacionPorCodigo): Promis
       //lanzar un error de token invalido
       throw new HttpErrors.Unauthorized("El token es invalido");
     }
+  }
+
+  /**
+   * Retorna los permisos del rol en un menu, esto es para pintar los menus
+   * @param id_rol
+   */
+  async ConsultarPermisosDeMenuPorUsuario(id_rol:number): Promise<MenuRol[]>{
+    let menu: MenuRol[] = await this.menurolRepository.find(
+      {
+      where:{
+        listar:true, // solo los que tengan permiso de listar ya que es el indicador para mostrar el menu
+        rolid:id_rol
+      }
+    });
+    return menu;
   }
 
 

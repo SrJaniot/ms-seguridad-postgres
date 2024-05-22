@@ -286,6 +286,70 @@ export class SeguridadController {
 
 
 
+    /**
+   * Metodo para identificar un usuario por medio de su correo y su clave sin generar un codigo 2fa
+   * @param credenciales
+   * @returns usuario
+   */
+    @post('/identificar-usuario-SIN-2fa')
+    @response(200, {
+      description: 'Identificar usuario por clave y correo',
+      content: {'application/json': {schema: getModelSchemaRef(Usuario)}},
+    })
+    async identificarUsuarioSin2fa(
+      @requestBody({
+        content: {
+          'application/json': {
+            schema: getModelSchemaRef(Credenciales),
+          },
+        },
+      })
+      credenciales: Credenciales,
+    ): Promise<object> {
+      let usuario = await this.seguridadService.identificarusuario(credenciales);
+      if (usuario) {
+        //generar codigo 2fa
+        let codigo2fa = this.seguridadService.crearTextoAleatoria(5);
+        //genera el login
+        let login: Login = new Login();
+        //genera token
+        let token = this.seguridadService.CrearToken(usuario);
+        //genera el menu de permisos la lista por rol
+        let menu = await this.seguridadService.ConsultarPermisosDeMenuPorUsuario(usuario.rolid);
+        //inicializa el login
+        login.usuarioid = usuario.id_usuario!;
+        login.codigo_2fa = codigo2fa;
+        login.estado_codigo2fa = true;
+        login.token = token;
+        login.estado_token = true;
+
+        //reformatear la clave para no mostrarla
+        usuario.clave = "";
+
+        await this.loginRepository.create(login);
+        //notificar al usuario via correo o sms del codigo 2fa
+
+        return {
+          "CODIGO": 200,
+          "MENSAJE": "Operación exitosa",
+          "DATOS": {
+            usuario,
+            token,
+            menu: menu
+          }
+        };
+      }
+      return {
+        "CODIGO": 2,
+        "MENSAJE": "Operación fallida",
+        "DATOS": "Usuario no encontrado"
+      }
+    }
+
+
+
+
+
   /**
    *  Metodo para validar el hash de un correo
    * @param hash

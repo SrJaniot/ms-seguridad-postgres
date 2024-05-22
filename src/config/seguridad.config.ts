@@ -2,9 +2,11 @@ export namespace ConfiguracionSeguridad {
   //-------------------------jwt -------------------------------------
   export const claveJWT = process.env.CLAVE_JWT;
   //-------------------------menus -------------------------------------
-  export const menu_ADMINISTAR_UsuarioID = "";
-  export const menuRolID = "";
-  export const menuTorneoID = "";
+  export const menuperfil = 1;
+  export const menuprueba = 2;
+  export const menuherramientas = 3;
+  export const menuresultados = 4;
+  export const menuroles = 5;
   //-------------------------acciones -------------------------------------
   export const listarAccion = "listar";
   export const guardarAccion = "guardar";
