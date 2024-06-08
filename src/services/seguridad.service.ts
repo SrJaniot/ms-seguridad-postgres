@@ -1,7 +1,7 @@
 import {injectable, /* inject, */ BindingScope} from '@loopback/core';
 import {Credenciales, FactorDeAutenticacionPorCodigo, MenuRol, Usuario} from '../models';
 import {repository} from '@loopback/repository';
-import {LoginRepository, MenuRolRepository, UsuarioRepository} from '../repositories';
+import {LoginRepository, MenuRolRepository, RolRepository, UsuarioRepository} from '../repositories';
 import {ConfiguracionSeguridad} from '../config/seguridad.config';
 import {HttpErrors} from '@loopback/rest';
 
@@ -27,6 +27,10 @@ export class SeguridadService {
     //inyeccion para poder utilizar el repositorio de MenuRol para poder hacer consultas a la base de datos
     @repository(MenuRolRepository)
     public menurolRepository: MenuRolRepository,
+
+    //inyeccion para poder utilizar el repositorio de rol para poder hacer consultas a la base de datos
+    @repository(RolRepository)
+    public RolRepository: RolRepository,
 
 
     ){}
@@ -203,6 +207,16 @@ async validarCoddigo2fa(credenciales2fa: FactorDeAutenticacionPorCodigo): Promis
       }
     });
     return menu;
+  }
+
+  //metodo para obtener el nombre del rol
+  async obtenerNombreRol(id_rol:number): Promise<string>{
+    let nombreRol = await this.RolRepository.findOne({
+      where:{
+        id_rol:id_rol
+      }
+    });
+    return nombreRol?.nombre as string;
   }
 
 

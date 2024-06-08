@@ -1,7 +1,7 @@
 // Uncomment these imports to begin using these cool features!
 
 import {getModelSchemaRef, HttpErrors, post,get, Request, requestBody, Response, response, RestBindings} from '@loopback/rest';
-import {CerrarSesion, Credenciales, FactorDeAutenticacionPorCodigo, HashValidacionUsuario, Login, Usuario, UsuarioInsert} from '../models';
+import {CerrarSesion, Credenciales, FactorDeAutenticacionPorCodigo, HashValidacionUsuario, Login, TokenModel, Usuario, UsuarioInsert} from '../models';
 import {repository} from '@loopback/repository';
 import {inject, service} from '@loopback/core';
 import {LoginRepository, UsuarioRepository} from '../repositories';
@@ -532,6 +532,37 @@ export class SeguridadController {
       let hash = this.seguridadService.crearTextoAleatoria(10);
       return {hash};
     }
+
+  //METODO QUE RECIBE UN TOKEN Y DEVUELVE EL NOMBRE DEL ROL
+  @post('/consultar-rol')
+  @response(200, {
+    description: 'consultar rol por token',
+  })
+  async consultarRol(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(TokenModel),
+        },
+      },
+    })
+    token: TokenModel,
+  ): Promise<object> {
+    let rol = await this.seguridadService.obtenerRolDesdeToken(token.token);
+    if (rol) {
+      let nombre_rol = await this.seguridadService.obtenerNombreRol(+rol);
+      return {
+        "CODIGO": 200,
+        "MENSAJE": "Operación exitosa",
+        "DATOS": {rol, nombre_rol}
+      };
+    }
+    return {
+      "CODIGO": 2,
+      "MENSAJE": "Operación fallida",
+      "DATOS": "Usuario no encontrado"
+    }
+  }
 
 
 

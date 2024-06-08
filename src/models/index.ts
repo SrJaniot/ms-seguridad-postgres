@@ -13,3 +13,4 @@ export * from './permisos-rol-menu.model';
 export * from './permisos-rol-menu2.model';
 
 
+export * from './token-model.model';
