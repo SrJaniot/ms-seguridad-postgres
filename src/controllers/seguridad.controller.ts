@@ -1,7 +1,7 @@
 // Uncomment these imports to begin using these cool features!
 
 import {getModelSchemaRef, HttpErrors, post,get, Request, requestBody, Response, response, RestBindings} from '@loopback/rest';
-import {CerrarSesion, Credenciales, FactorDeAutenticacionPorCodigo, HashValidacionUsuario, Login, TokenModel, Usuario, UsuarioInsert} from '../models';
+import {CerrarSesion, Credenciales, FactorDeAutenticacionPorCodigo, HashValidacionUsuario, Login, TokenModel, Usuario, UsuarioInsert, UsuarioInsertActivacion} from '../models';
 import {repository} from '@loopback/repository';
 import {inject, service} from '@loopback/core';
 import {LoginRepository, UsuarioRepository} from '../repositories';
@@ -132,6 +132,189 @@ export class SeguridadController {
       };
     }
   }
+
+
+
+
+
+  // este sera el registro publico de los USUARIOS
+  //este enpoint debe ser unicamente usado por el administrador                     --OJO--
+  //METODO POST PARA INSERTAR DATOS USUARIO EN LA BASE DE DATOS POSTGRES
+  @post('/funcion-inserta-usuario-rolEstudiante-CONACTIVACION')
+  @response(200, {
+    description: ' db postgres ',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(UsuarioInsertActivacion),
+
+      },
+    },
+  })
+  async crearUsuario_CON_ACTIVACION(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(UsuarioInsertActivacion),
+        },
+      },
+    })
+    data: UsuarioInsertActivacion,
+  ): Promise<object> {
+    try {
+      //CREAR UN OBJETO DE TIPO USUARIO PARA INSERTARLO EN LA BASE DE DATOS
+      let usuario: Usuario = new Usuario();
+      usuario.id_usuario = data.id_usuario;
+      usuario.nombre = data.nombre;
+      usuario.correo = data.correo.toLowerCase();
+      usuario.celular = data.celular;
+      //ROL APRENDIZ
+      usuario.rolid = ConfiguracionSeguridad.rolEstudianteID;
+      //CIFRAR LA CONTRASEÑA
+      let clavecifrada = this.seguridadService.encriptartexto(data.clave);
+      //ASIGNAR LA CLAVE CIFRADA AL USUARIO
+      usuario.clave = clavecifrada;
+      //console.log(params);
+      usuario.estadovalidacion = true;
+      usuario.aceptado = data.cuenta_activa;
+      //IF QUE PERMITE SABER SI EL CORREO YA EXISTE EN LA BASE DE DATOS POSTGRES
+      let existeCorreo = await this.usuarioRepository.findOne({
+        where: {
+          correo: usuario.correo
+        }
+      });
+      if (existeCorreo) {
+        return {
+          "CODIGO": 3,
+          "MENSAJE": "El correo ya existe en la base de datos",
+          "DATOS": "El correo ya existe en la base de datos"
+        };
+      }
+      //IF QUE ME PERMITE SABER SI EL ID_USUARIO YA EXISTE EN LA BASE DE DATOS POSTGRES
+      let existeIdUsuario = await this.usuarioRepository.findOne({
+        where: {
+          id_usuario: usuario.id_usuario
+        }
+      });
+      if (existeIdUsuario) {
+        return {
+          "CODIGO": 3,
+          "MENSAJE": "El id_usuario (NUM DOC) ya existe en la base de datos",
+          "DATOS": "El id_usuario (NUM DOC) ya existe en la base de datos"
+        };
+      }
+
+      const result = await this.usuarioRepository.create(usuario);
+      //eliminar la clave encriptada
+      result.clave = "";
+
+      //ENVIAR CORREO ELECTRONICO DE CONFIRMACION
+
+      return {
+        "CODIGO": 200,
+        "MENSAJE": "Operación exitosa",
+        "DATOS": result
+      };
+    } catch (err) {
+      throw {
+        "CODIGO": 500,
+        "MENSAJE": `Error al realizar las operaciones: ${err}`,
+        "DATOS": `Error al realizar las operaciones: ${err}`
+      };
+    }
+  }
+
+
+
+
+
+  //METODO POST PARA ACTUALIZAR DATOS USUARIO EN LA BASE DE DATOS POSTGRES
+@post('/funcion-actualiza-usuario-rolEstudiante-CONACTIVACION')
+@response(200, {
+  description: ' db postgres ',
+  content: {
+    'application/json': {
+      schema: getModelSchemaRef(UsuarioInsertActivacion),
+    },
+  },
+})
+async actualizarUsuario_CON_ACTIVACION(
+  @requestBody({
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(UsuarioInsertActivacion),
+      },
+    },
+  })
+  data: UsuarioInsertActivacion,
+): Promise<object> {
+  try {
+    //CREAR UN OBJETO DE TIPO USUARIO PARA ACTUALIZARLO EN LA BASE DE DATOS
+    let usuario: Usuario = new Usuario();
+    usuario.id_usuario = data.id_usuario;
+    usuario.nombre = data.nombre;
+    usuario.correo = data.correo.toLowerCase();
+    usuario.celular = data.celular;
+    //ROL APRENDIZ
+    usuario.rolid = ConfiguracionSeguridad.rolEstudianteID;
+    //CIFRAR LA CONTRASEÑA
+    let clavecifrada = this.seguridadService.encriptartexto(data.clave);
+    //ASIGNAR LA CLAVE CIFRADA AL USUARIO
+    usuario.clave = clavecifrada;
+    usuario.estadovalidacion = true;
+    usuario.aceptado = data.cuenta_activa;
+
+    //IF QUE PERMITE SABER SI EL CORREO YA EXISTE EN LA BASE DE DATOS POSTGRES
+    let existeCorreo = await this.usuarioRepository.findOne({
+      where: {
+        correo: usuario.correo,
+        id_usuario: { neq: usuario.id_usuario } // Excluir el usuario actual
+      }
+    });
+    if (existeCorreo) {
+      return {
+        "CODIGO": 3,
+        "MENSAJE": "El correo ya existe en la base de datos",
+        "DATOS": "El correo ya existe en la base de datos"
+      };
+    }
+
+    //IF QUE ME PERMITE SABER SI EL ID_USUARIO YA EXISTE EN LA BASE DE DATOS POSTGRES
+    let existeIdUsuario = await this.usuarioRepository.findOne({
+      where: {
+        id_usuario: usuario.id_usuario
+      }
+    });
+    if (!existeIdUsuario) {
+      return {
+        "CODIGO": 3,
+        "MENSAJE": "El id_usuario (NUM DOC) no existe en la base de datos",
+        "DATOS": "El id_usuario (NUM DOC) no existe en la base de datos"
+      };
+    }
+
+    // Actualizar el usuario
+    await this.usuarioRepository.updateById(usuario.id_usuario, usuario);
+
+    // Obtener el usuario actualizado
+    const result = await this.usuarioRepository.findById(usuario.id_usuario);
+    // Eliminar la clave encriptada
+    result.clave = "";
+
+    //ENVIAR CORREO ELECTRONICO DE CONFIRMACION
+
+    return {
+      "CODIGO": 200,
+      "MENSAJE": "Operación exitosa",
+      "DATOS": result
+    };
+  } catch (err) {
+    throw {
+      "CODIGO": 500,
+      "MENSAJE": `Error al realizar las operaciones: ${err}`,
+      "DATOS": `Error al realizar las operaciones: ${err}`
+    };
+  }
+}
 
 
 

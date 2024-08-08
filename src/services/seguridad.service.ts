@@ -74,7 +74,8 @@ export class SeguridadService {
       where:{
         correo:credenciales.correo,
         clave:credenciales.clave,
-        estadovalidacion:true
+        estadovalidacion:true,
+        aceptado:true
 
       }
     });

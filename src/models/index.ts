@@ -14,3 +14,4 @@ export * from './permisos-rol-menu2.model';
 
 
 export * from './token-model.model';
+export * from './usuario-insert-activacion.model';
