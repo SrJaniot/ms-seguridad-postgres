@@ -6,7 +6,8 @@ import {Rol} from './rol.model';
 
 // ACA SE AGREGA LA ESPECIFICACION DE LA RELACION ENTRE USUARIO Y ROL ES DECIR LLAVE FORANEA PARA LA TABLA ROL
 // PARA HACER LAS MIGRACIONES PRIMERO TIENE QUE EXISTIR LOS ATRIBUTOS Y LAS RELACIONES CON "lb4 relation"
-// LUEGO SE HACE LA MIGRACION CON "npm run build" Y "npm run migrate" siempre y cuando ya se haya configurado la base de datos
+// LUEGO SE HACE LA MIGRACION CON "cd ..
+// " siempre y cuando ya se haya configurado la base de datos
 @model(
   {
     settings: {
