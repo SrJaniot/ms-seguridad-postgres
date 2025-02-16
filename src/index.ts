@@ -1,4 +1,8 @@
 import {ApplicationConfig, App} from './application';
+import * as fs from 'fs';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 export * from './application';
 
@@ -20,16 +24,14 @@ if (require.main === module) {
     rest: {
       port: +(process.env.PORT ?? 3000),
       host: process.env.HOST ?? '127.0.0.1',
-      // The `gracePeriodForClose` provides a graceful close for http/https
-      // servers with keep-alive clients. The default value is `Infinity`
-      // (don't force-close). If you want to immediately destroy all sockets
-      // upon stop, set its value to `0`.
-      // See https://www.npmjs.com/package/stoppable
       gracePeriodForClose: 5000, // 5 seconds
       openApiSpec: {
-        // useful when used with OpenAPI-to-GraphQL to locate your application
         setServersFromRequest: true,
       },
+      // Enable HTTPS  sudo certbot certonly --standalone -d coco.casinosoft.com.co
+      //protocol: 'https',
+      //key: fs.readFileSync('/etc/letsencrypt/live/coco.casinosoft.com.co/privkey.pem'),
+      //cert: fs.readFileSync('/etc/letsencrypt/live/coco.casinosoft.com.co/fullchain.pem'),
     },
   };
   main(config).catch(err => {

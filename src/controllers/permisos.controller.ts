@@ -19,6 +19,8 @@ import {
 } from '@loopback/rest';
 import {MenuRol} from '../models';
 import {MenuRolRepository} from '../repositories';
+import {authenticate} from '@loopback/authentication';
+import {ConfiguracionSeguridad} from '../config/seguridad.config';
 
 export class PermisosController {
   constructor(
@@ -26,6 +28,10 @@ export class PermisosController {
     public menuRolRepository : MenuRolRepository,
   ) {}
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @post('/permiso')
   @response(200, {
     description: 'MenuRol model instance',
@@ -47,6 +53,10 @@ export class PermisosController {
     return this.menuRolRepository.create(menuRol);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/permiso/count')
   @response(200, {
     description: 'MenuRol model count',
@@ -58,6 +68,10 @@ export class PermisosController {
     return this.menuRolRepository.count(where);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/permiso')
   @response(200, {
     description: 'Array of MenuRol model instances',
@@ -76,6 +90,10 @@ export class PermisosController {
     return this.menuRolRepository.find(filter);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @patch('/permiso')
   @response(200, {
     description: 'MenuRol PATCH success count',
@@ -95,6 +113,10 @@ export class PermisosController {
     return this.menuRolRepository.updateAll(menuRol, where);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/permiso/{id}')
   @response(200, {
     description: 'MenuRol model instance',
@@ -111,6 +133,10 @@ export class PermisosController {
     return this.menuRolRepository.findById(id, filter);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @patch('/permiso/{id}')
   @response(204, {
     description: 'MenuRol PATCH success',
@@ -129,6 +155,10 @@ export class PermisosController {
     await this.menuRolRepository.updateById(id, menuRol);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @put('/permiso/{id}')
   @response(204, {
     description: 'MenuRol PUT success',
@@ -140,6 +170,10 @@ export class PermisosController {
     await this.menuRolRepository.replaceById(id, menuRol);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @del('/permiso/{id}')
   @response(204, {
     description: 'MenuRol DELETE success',

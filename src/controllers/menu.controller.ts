@@ -19,6 +19,8 @@ import {
 } from '@loopback/rest';
 import {Menu} from '../models';
 import {MenuRepository} from '../repositories';
+import {ConfiguracionSeguridad} from '../config/seguridad.config';
+import {authenticate} from '@loopback/authentication';
 
 export class MenuController {
   constructor(
@@ -26,6 +28,11 @@ export class MenuController {
     public menuRepository : MenuRepository,
   ) {}
 
+
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @post('/menu')
   @response(200, {
     description: 'Menu model instance',
@@ -47,6 +54,10 @@ export class MenuController {
     return this.menuRepository.create(menu);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/menu/count')
   @response(200, {
     description: 'Menu model count',
@@ -58,6 +69,10 @@ export class MenuController {
     return this.menuRepository.count(where);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/menu')
   @response(200, {
     description: 'Array of Menu model instances',
@@ -76,6 +91,10 @@ export class MenuController {
     return this.menuRepository.find(filter);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @patch('/menu')
   @response(200, {
     description: 'Menu PATCH success count',
@@ -95,6 +114,10 @@ export class MenuController {
     return this.menuRepository.updateAll(menu, where);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/menu/{id}')
   @response(200, {
     description: 'Menu model instance',
@@ -111,6 +134,10 @@ export class MenuController {
     return this.menuRepository.findById(id, filter);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @patch('/menu/{id}')
   @response(204, {
     description: 'Menu PATCH success',
@@ -129,6 +156,10 @@ export class MenuController {
     await this.menuRepository.updateById(id, menu);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @put('/menu/{id}')
   @response(204, {
     description: 'Menu PUT success',
@@ -140,6 +171,10 @@ export class MenuController {
     await this.menuRepository.replaceById(id, menu);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @del('/menu/{id}')
   @response(204, {
     description: 'Menu DELETE success',

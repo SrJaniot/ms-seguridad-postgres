@@ -7,6 +7,9 @@ export namespace ConfiguracionSeguridad {
   export const menuherramientas = 3;
   export const menuresultados = 4;
   export const menuroles = 5;
+  export const menupreguntas = 6;
+  export const menuinstitucion = 7;
+  export const menupruebaestudiantes = 8;
   //-------------------------acciones -------------------------------------
   export const listarAccion = "listar";
   export const guardarAccion = "guardar";

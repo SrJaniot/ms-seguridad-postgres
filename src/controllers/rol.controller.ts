@@ -19,6 +19,8 @@ import {
 } from '@loopback/rest';
 import {Rol} from '../models';
 import {RolRepository} from '../repositories';
+import {authenticate} from '@loopback/authentication';
+import {ConfiguracionSeguridad} from '../config/seguridad.config';
 
 export class RolController {
   constructor(
@@ -26,6 +28,10 @@ export class RolController {
     public rolRepository : RolRepository,
   ) {}
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @post('/rol')
   @response(200, {
     description: 'Rol model instance',
@@ -47,6 +53,10 @@ export class RolController {
     return this.rolRepository.create(rol);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/rol/count')
   @response(200, {
     description: 'Rol model count',
@@ -58,6 +68,10 @@ export class RolController {
     return this.rolRepository.count(where);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/rol')
   @response(200, {
     description: 'Array of Rol model instances',
@@ -76,6 +90,10 @@ export class RolController {
     return this.rolRepository.find(filter);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @patch('/rol')
   @response(200, {
     description: 'Rol PATCH success count',
@@ -95,6 +113,10 @@ export class RolController {
     return this.rolRepository.updateAll(rol, where);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/rol/{id}')
   @response(200, {
     description: 'Rol model instance',
@@ -111,6 +133,10 @@ export class RolController {
     return this.rolRepository.findById(id, filter);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @patch('/rol/{id}')
   @response(204, {
     description: 'Rol PATCH success',
@@ -129,6 +155,10 @@ export class RolController {
     await this.rolRepository.updateById(id, rol);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @put('/rol/{id}')
   @response(204, {
     description: 'Rol PUT success',
@@ -140,6 +170,10 @@ export class RolController {
     await this.rolRepository.replaceById(id, rol);
   }
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @del('/rol/{id}')
   @response(204, {
     description: 'Rol DELETE success',

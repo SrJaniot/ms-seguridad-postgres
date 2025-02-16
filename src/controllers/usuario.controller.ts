@@ -21,6 +21,8 @@ import {Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
 import {service} from '@loopback/core';
 import {SeguridadService} from '../services';
+import {authenticate} from '@loopback/authentication';
+import {ConfiguracionSeguridad} from '../config/seguridad.config';
 
 export class UsuarioController {
   constructor(
@@ -31,6 +33,10 @@ export class UsuarioController {
     public seguridadService: SeguridadService,
   ) {}
 
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @post('/usuarios')
   @response(200, {
     description: 'Usuario model instance',
@@ -79,7 +85,10 @@ export class UsuarioController {
       "DATOS": {result}
     };
   }
-
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/usuarios/count')
   @response(200, {
     description: 'Usuario model count',
@@ -90,7 +99,10 @@ export class UsuarioController {
   ): Promise<Count> {
     return this.usuarioRepository.count(where);
   }
-
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/usuarios')
   @response(200, {
     description: 'Array of Usuario model instances',
@@ -108,7 +120,10 @@ export class UsuarioController {
   ): Promise<Usuario[]> {
     return this.usuarioRepository.find(filter);
   }
-
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @patch('/usuarios')
   @response(200, {
     description: 'Usuario PATCH success count',
@@ -127,7 +142,10 @@ export class UsuarioController {
   ): Promise<Count> {
     return this.usuarioRepository.updateAll(usuario, where);
   }
-
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @get('/usuarios/{id}')
   @response(200, {
     description: 'Usuario model instance',
@@ -143,7 +161,10 @@ export class UsuarioController {
   ): Promise<Usuario> {
     return this.usuarioRepository.findById(id, filter);
   }
-
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @patch('/usuarios/{id}')
   @response(204, {
     description: 'Usuario PATCH success',
@@ -161,7 +182,10 @@ export class UsuarioController {
   ): Promise<void> {
     await this.usuarioRepository.updateById(id, usuario);
   }
-
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @put('/usuarios/{id}')
   @response(204, {
     description: 'Usuario PUT success',
@@ -172,7 +196,10 @@ export class UsuarioController {
   ): Promise<void> {
     await this.usuarioRepository.replaceById(id, usuario);
   }
-
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @del('/usuarios/{id}')
   @response(204, {
     description: 'Usuario DELETE success',

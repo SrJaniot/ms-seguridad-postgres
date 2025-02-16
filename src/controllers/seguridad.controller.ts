@@ -7,6 +7,7 @@ import {inject, service} from '@loopback/core';
 import {LoginRepository, UsuarioRepository} from '../repositories';
 import {SeguridadService} from '../services';
 import {ConfiguracionSeguridad} from '../config/seguridad.config';
+import {authenticate} from '@loopback/authentication';
 
 
 
@@ -50,6 +51,10 @@ export class SeguridadController {
   // este sera el registro publico de los USUARIOS
   //este enpoint debe ser unicamente usado por el administrador                     --OJO--
   //METODO POST PARA INSERTAR DATOS USUARIO EN LA BASE DE DATOS POSTGRES
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @post('/funcion-inserta-usuario-rolEstudiante-SINHASHDEVALIDACION')
   @response(200, {
     description: ' db postgres ',
@@ -140,6 +145,10 @@ export class SeguridadController {
   // este sera el registro publico de los USUARIOS
   //este enpoint debe ser unicamente usado por el administrador                     --OJO--
   //METODO POST PARA INSERTAR DATOS USUARIO EN LA BASE DE DATOS POSTGRES
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.guardarAccion]
+  })
   @post('/funcion-inserta-usuario-rolEstudiante-CONACTIVACION')
   @response(200, {
     description: ' db postgres ',
@@ -228,6 +237,10 @@ export class SeguridadController {
 
 
   //METODO POST PARA ACTUALIZAR DATOS USUARIO EN LA BASE DE DATOS POSTGRES
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.editarAccion]
+  })
 @post('/funcion-actualiza-usuario-rolEstudiante-CONACTIVACION')
 @response(200, {
   description: ' db postgres ',
@@ -323,6 +336,10 @@ async actualizarUsuario_CON_ACTIVACION(
   // este sera el registro publico de los USUARIOS
   //este enpoint debe ser unicamente usado por el administrador                     --OJO--
   //METODO POST PARA INSERTAR DATOS USUARIO EN LA BASE DE DATOS POSTGRES
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.editarAccion]
+  })
   @post('/funcion-inserta-usuario-rolTutor-CONACTIVACION')
   @response(200, {
     description: ' db postgres ',
@@ -411,6 +428,10 @@ async actualizarUsuario_CON_ACTIVACION(
 
 
   //METODO POST PARA ACTUALIZAR DATOS USUARIO EN LA BASE DE DATOS POSTGRES
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.editarAccion]
+  })
 @post('/funcion-actualiza-usuario-rolTutor-CONACTIVACION')
 @response(200, {
   description: ' db postgres ',
@@ -506,6 +527,10 @@ async actualizarUsuario_CON_ACTIVACION_TUTOR(
   // este sera el registro publico de los USUARIOS
   //METODO POST PARA INSERTAR DATOS USUARIO EN LA BASE DE DATOS POSTGRES CON HASH DE VALIDACION
   //publico
+  @authenticate({
+    strategy: 'auth',
+    options: [ConfiguracionSeguridad.menuinstitucion, ConfiguracionSeguridad.editarAccion]
+  })
   @post('/funcion-inserta-usuario-rolEstudiante-CONHASHDEVALIDACION')
   @response(200, {
     description: ' db postgres ',
